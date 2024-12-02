@@ -1,42 +1,41 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme, TouchableOpacity } from 'react-native';
 import RecipeGenerator from './screens/RecipeGenerator';
-import { AllergyProvider } from './Context/AllergyContent'; // Import AllergyProvider
-import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons
+import { AllergyProvider } from './Context/AllergyContent';
+import Icon from 'react-native-vector-icons/Ionicons';
 
-// Import the new Tab Navigator and screens
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Allergies from './screens/Allergies'; // This will stay the same
+import Allergies from './screens/Allergies';
 import MyKitchen from './screens/MyKitchen';
 import Profile from './screens/Profile';
 import Settings from './screens/Settings';
+import Login from './screens/Login';
+import { AuthProvider, useAuth } from './Context/AuthContext';
 
 const Stack = createNativeStackNavigator();
-const Tab = createMaterialTopTabNavigator(); // Declare the tab navigator
+const Tab = createMaterialTopTabNavigator();
 
-// Define the type for navigation structure
 export type RootStackParamList = {
   Home: undefined;
   Settings: undefined;
+  Login: undefined;
 };
 
-// Declare global types for React Navigation
 declare global {
   namespace ReactNavigation {
     interface RootParamList extends RootStackParamList {}
   }
 }
 
-// Create the Tab Navigator for Settings
 const SettingsTabs = () => (
   <Tab.Navigator
     screenOptions={{
-      tabBarActiveTintColor: '#36c190', // Active tab color
-      tabBarInactiveTintColor: '#000000', // Inactive tab text color
-      tabBarLabelStyle: { fontSize: 16, color: '#000000' }, // Label text color
-      tabBarStyle: { backgroundColor: '#f7f9fc' }, // Tab bar background color
+      tabBarActiveTintColor: '#36c190',
+      tabBarInactiveTintColor: '#000000',
+      tabBarLabelStyle: { fontSize: 16, color: '#000000' },
+      tabBarStyle: { backgroundColor: '#f7f9fc' },
     }}
   >
     <Tab.Screen name="Allergies" component={Allergies} />
@@ -48,6 +47,7 @@ const SettingsTabs = () => (
 
 function RootStack() {
   const isDarkMode = useColorScheme() === 'dark';
+  const { onLogout } = useAuth(); // Access the logout function
 
   return (
     <Stack.Navigator initialRouteName="Home">
@@ -56,35 +56,67 @@ function RootStack() {
         component={RecipeGenerator}
         options={({ navigation }) => ({
           title: 'Recipe Generator',
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={async () => {
+                await onLogout(); // Clear authentication state
+                // No manual navigation needed; state will handle screen switching
+              }}
+              style={{ marginLeft: 10 }}
+            >
+              <Icon name="log-out-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
+            </TouchableOpacity>
+          ),
+          
           headerRight: () => (
-<TouchableOpacity
-  onPress={() => navigation.navigate('SettingsTabs')}
-  style={{ marginRight: 10 }}
->
-  <Icon name="settings" size={30} color={isDarkMode ? '#fff' : '#000'} />
-</TouchableOpacity>
-
+            <TouchableOpacity
+              onPress={() => navigation.navigate('SettingsTabs')}
+              style={{ marginRight: 10 }}
+            >
+              <Icon name="settings" size={30} color={isDarkMode ? '#fff' : '#000'} />
+            </TouchableOpacity>
           ),
         })}
       />
-      {/* Update the Settings screen to use SettingsTabs */}
       <Stack.Screen
-  name="SettingsTabs"
-  component={SettingsTabs}
-  options={{ title: 'Settings' }}
-/>
+        name="SettingsTabs"
+        component={SettingsTabs}
+        options={{ title: 'Settings' }}
+      />
     </Stack.Navigator>
   );
 }
 
-const App: React.FC = () => {
+
+function AuthStack() {
   return (
-    <AllergyProvider>
-      <NavigationContainer>
-        <RootStack />
-      </NavigationContainer>
-    </AllergyProvider>
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Login"
+        component={Login}
+        options={{ title: 'Login' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+const AppContent: React.FC = () => {
+  const { authState } = useAuth();
+  console.log(authState.authenticated); // Debugging
+
+  return (
+    <NavigationContainer>
+      {authState.authenticated ? <RootStack /> : <AuthStack />}
+    </NavigationContainer>
   );
 };
+
+const App: React.FC = () => (
+  <AuthProvider>
+    <AllergyProvider>
+      <AppContent />
+    </AllergyProvider>
+  </AuthProvider>
+);
 
 export default App;
