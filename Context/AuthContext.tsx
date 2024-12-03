@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { useUser } from './UserContext'; // Import UserContext
 
 interface AuthProps {
     authState?: { token: string | null; authenticated: boolean | null };
@@ -24,6 +25,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: any) => {
+    const { setUser } = useUser(); // Access the setUser function from UserContext
     const [authState, setAuthState] = useState<{
         token: string | null;
         authenticated: boolean | null;
@@ -32,22 +34,30 @@ export const AuthProvider = ({ children }: any) => {
     useEffect(() => {
         const loadToken = async () => {
             const token = await SecureStore.getItemAsync(TOKEN_KEY);
-            console.log('stored', token);
-
             if (token) {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                 setAuthState({
                     token: token,
                     authenticated: true,
                 });
+                // Fetch user details with the token
+                const userResponse = await axios.get(`${API_URL}/auth/user`);
+                setUser(userResponse.data); // Update the user in UserContext
             }
         };
+        
         loadToken();
     }, []);
 
+
     const register = async (username: string, password: string) => {
         try {
-            return await axios.post(`${API_URL}/users`, { username, password });
+            const result = await axios.post(`${API_URL}/users`, { username, password });
+            // Automatically log in after successful registration
+            await login(username, password);
+            const userResponse = await axios.get(`${API_URL}/users/username/${username}`);
+            setUser(userResponse.data); // Update the user in UserContext
+            return result;
         } catch (e) {
             return { error: true, msg: (e as any).response.data.msg };
         }
@@ -55,48 +65,42 @@ export const AuthProvider = ({ children }: any) => {
 
     const login = async (username: string, password: string) => {
         try {
-
-            const result = await axios.post(`${API_URL}/auth/login`, { username, password }); // Update endpoint here
-
+            const result = await axios.post(`${API_URL}/auth/login`, { username, password });
             setAuthState({
-                token: result.data.accessToken, // Ensure the key matches the backend's response
+                token: result.data.accessToken,
                 authenticated: true,
             });
             axios.defaults.headers.common['Authorization'] = `Bearer ${result.data.accessToken}`;
-            
             await SecureStore.setItemAsync(TOKEN_KEY, result.data.accessToken);
+
+            // Fetch and set the user details
+            const userResponse = await axios.get(`${API_URL}/users/username/${username}`);
+            setUser(userResponse.data); // Update the user in UserContext
             
             return result;
-
         } catch (e) {
-            
-            return { error: true, msg: (e as any).response.data.message }; // Use `message` to match your backend
+            return { error: true, msg: (e as any).response.data.message };
         }
     };
 
     const logout = async () => {
         try {
-            await axios.post(`${API_URL}/auth/logout`); // Call the backend logout endpoint
+            await axios.post(`${API_URL}/auth/logout`);
             await SecureStore.deleteItemAsync(TOKEN_KEY);
-
             axios.defaults.headers.common['Authorization'] = '';
-
             setAuthState({
                 token: null,
                 authenticated: false,
             });
+            setUser(null); // Clear user data in UserContext
         } catch (e) {
-            console.error('Logout failed:', e); // Log any errors during logout
+            console.error('Logout failed:', e);
         }
     };
 
-    const value = {
-        onRegister: register,
-        onLogin: login,
-        onLogout: logout,
-        authState,
-    };    
-
-    
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>; // Correct rendering
+    return (
+        <AuthContext.Provider value={{ onRegister: register, onLogin: login, onLogout: logout, authState }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };

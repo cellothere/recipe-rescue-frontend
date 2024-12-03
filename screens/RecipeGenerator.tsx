@@ -14,31 +14,35 @@ import {
   Platform
 } from 'react-native';
 import axios from 'axios';
-import { useAllergyContext } from '../Context/AllergyContent'; // Import allergy context
+import { useAllergyContext } from '../Context/AllergyContext'; // Import allergy context
 import LoadingIcon from '../components/LoadingIcon';
 import RecipeLines from '../components/RecipeLines'; // Import the RecipeLines component
-
+import { useUser } from '../Context/UserContext';
 import RNPickerSelect from 'react-native-picker-select';
 
 const RecipeGenerator: React.FC = () => {
+  const { user } = useUser(); 
+  console.log(user)
   const isDarkMode = useColorScheme() === 'dark';
   const pickerRef = useRef<RNPickerSelect | null>(null);
   const backgroundStyle = {
     backgroundColor: isDarkMode ? '#1c1c1c' : '#f2f2f2',
     flex: 1,
   };
-  const [originalServings, setOriginalServings] = useState<number | null>(null); // Track the servings used for the last generated recipe
-  const [showUpdateButton, setShowUpdateButton] = useState(false); // Show "Update Recipe" button if servings change
 
+  const [originalServings, setOriginalServings] = useState<number | null>(null);
+  const [showUpdateButton, setShowUpdateButton] = useState(false);
   const [alreadyUsed, setAlreadyUsed] = useState<string[]>([]);
   const [recipeTitle, setRecipeTitle] = useState('');
-  const { allergies } = useAllergyContext(); // Access allergies from context
+  const { allergies } = useAllergyContext();
   const [currentIngredient, setCurrentIngredient] = useState('');
   const [ingredientsList, setIngredientsList] = useState<string[]>([]);
   const [recipeLines, setRecipeLines] = useState<{ original: string; substitution: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedServings, setSelectedServings] = useState<number | null>(null); // Track selected servings
-  const API_BASE_URL = 'http://192.168.1.66:5001/api/recipes';
+  const [selectedServings, setSelectedServings] = useState<number | null>(null);
+
+
+  const API_BASE_URL = 'http://192.168.1.66:5001/api';
   //192.168.0.9
 
   // Picker Styles
@@ -69,7 +73,7 @@ const RecipeGenerator: React.FC = () => {
       Alert.alert('Error', 'Please add at least one ingredient');
       return;
     }
-  
+
     setIsLoading(true);
     try {
       const payload = {
@@ -77,16 +81,16 @@ const RecipeGenerator: React.FC = () => {
         allergies: allergies,
         ...(selectedServings && { servings: selectedServings }),
       };
-  
-      const response = await axios.post(`${API_BASE_URL}/generate`, payload);
+
+      const response = await axios.post(`${API_BASE_URL}/recipes/generate`, payload);
       const recipe = response.data.recipe || '';
       const recipeArray = recipe.split('\n');
-  
+
       const updatedRecipeLines = recipeArray.map((line) => ({
         original: line,
         substitution: line,
       }));
-  
+
       setRecipeLines(updatedRecipeLines);
       setRecipeTitle(recipeArray[0].replace(/[*_#~`]/g, ''));
       setOriginalServings(selectedServings); // Set the initial serving size
@@ -98,30 +102,29 @@ const RecipeGenerator: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
 
   // Substitute Ingredient in Recipe
   const substituteIngredient = async (lineIndex: number) => {
     const currentLine = recipeLines[lineIndex];
     try {
-      const response = await axios.post(`${API_BASE_URL}/substitute`, {
+      const response = await axios.post(`${API_BASE_URL}/recipes/substitute`, {
         ingredient: currentLine.original,
         alreadyUsed: alreadyUsed,
         allergies: allergies,
       });
-  
+
       const substitute = response.data.substitute || 'No substitute available';
-  
+
       // Update the specific recipe line
       const updatedLines = [...recipeLines];
       updatedLines[lineIndex] = {
         ...updatedLines[lineIndex],
         substitution: substitute,
       };
-  
+
       // Update the state
       setRecipeLines(updatedLines);
-  
+
       // Add the substitute to alreadyUsed list
       setAlreadyUsed((prevList) => [...prevList, substitute]);
     } catch (error) {
@@ -129,29 +132,64 @@ const RecipeGenerator: React.FC = () => {
       Alert.alert('Error', 'Failed to fetch substitute');
     }
   };
-  
+
+  //save recipe
+  const saveRecipe = async () => {
+    if (!recipeTitle || ingredientsList.length === 0 || recipeLines.length === 0) {
+      Alert.alert('Error', 'Please generate a recipe first.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      
+      // Fetch the userId from the backend
+      const userResponse = await axios.get(`${API_BASE_URL}/users/username/${user}`);
+      const { userId } = userResponse.data;
+      
+      const payload = {
+        name: recipeTitle.trim(),
+        ingredients: ingredientsList,
+        instructions: recipeLines.map((line) => line.original).join('\n'),
+        userId, // Use the fetched userId
+      };
+
+      // Save the recipe
+      const response = await axios.post(`${API_BASE_URL}/recipes/save`, payload);
+      const { message } = response.data;
+
+      Alert.alert('Success', message);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Failed to save the recipe.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  //update servings
   const updateServings = async () => {
     if (!recipeLines.length) {
       Alert.alert('Error', 'No recipe to update. Please generate a recipe first.');
       return;
     }
-  
+
     setIsLoading(true);
     try {
       const payload = {
         recipe: recipeLines.map((line) => line.original).join('\n'),
         servings: selectedServings,
       };
-  
-      const response = await axios.post(`${API_BASE_URL}/updateServings`, payload);
+
+      const response = await axios.post(`${API_BASE_URL}/recipes/updateServings`, payload);
       const updatedRecipe = response.data.updatedRecipe || '';
       const updatedRecipeArray = updatedRecipe.split('\n');
-  
+
       const updatedRecipeLines = updatedRecipeArray.map((line) => ({
         original: line,
         substitution: line,
       }));
-  
+
       setRecipeLines(updatedRecipeLines);
       setOriginalServings(selectedServings); // Update the reference servings
       setShowUpdateButton(false); // Hide button after successful update
@@ -232,37 +270,37 @@ const RecipeGenerator: React.FC = () => {
           >
             <Text style={styles.selectedText}>Servings:</Text>
             <RNPickerSelect
-  ref={pickerRef}
-  onValueChange={(value) => {
-    setSelectedServings(value);
-    setShowUpdateButton(value !== originalServings && recipeLines.length > 0); // Only show if different and recipe exists
-  }}
-  items={[
-    { label: "1", value: 1 },
-    { label: "2", value: 2 },
-    { label: "3", value: 3 },
-    { label: "4", value: 4 },
-    { label: "5", value: 5 },
-    { label: "6", value: 6 },
-    { label: "7", value: 7 },
-    { label: "8", value: 8 },
-    { label: "9", value: 9 },
-    { label: "10", value: 10 },
-  ]}
-  style={pickerSelectStyles}
-  useNativeAndroidPickerStyle={false}
-/>
+              ref={pickerRef}
+              onValueChange={(value) => {
+                setSelectedServings(value);
+                setShowUpdateButton(value !== originalServings && recipeLines.length > 0); // Only show if different and recipe exists
+              }}
+              items={[
+                { label: "1", value: 1 },
+                { label: "2", value: 2 },
+                { label: "3", value: 3 },
+                { label: "4", value: 4 },
+                { label: "5", value: 5 },
+                { label: "6", value: 6 },
+                { label: "7", value: 7 },
+                { label: "8", value: 8 },
+                { label: "9", value: 9 },
+                { label: "10", value: 10 },
+              ]}
+              style={pickerSelectStyles}
+              useNativeAndroidPickerStyle={false}
+            />
 
           </TouchableOpacity>
           {showUpdateButton && (
-  <TouchableOpacity
-    style={styles.buttonUpdate}
-    onPress={updateServings}
-    disabled={isLoading}
-  >
-    <Text style={styles.buttonText}>Update Recipe</Text>
-  </TouchableOpacity>
-)}
+            <TouchableOpacity
+              style={styles.buttonUpdate}
+              onPress={updateServings}
+              disabled={isLoading}
+            >
+              <Text style={styles.buttonText}>Update Recipe</Text>
+            </TouchableOpacity>
+          )}
 
 
 
@@ -279,21 +317,19 @@ const RecipeGenerator: React.FC = () => {
           {/* Clear All Button */}
           {!isLoading && recipeLines.length > 0 && (
             <TouchableOpacity
-  style={[styles.button, { backgroundColor: '#ff6f61' }]}
-  onPress={() => {
-    setIngredientsList([]);        // Clear the ingredients list
-    setRecipeLines([]);            // Clear the recipe lines
-    setCurrentIngredient('');      // Reset the current ingredient input
-    setSelectedServings(null);     // Reset the selected servings
-    setShowUpdateButton(false);    // Hide the "Update Recipe" button
-    setAlreadyUsed([]);            // Clear the already used substitutes
-  }}
->
-  <Text style={styles.buttonText}>Clear All</Text>
-</TouchableOpacity>
-
+              style={[styles.button, { backgroundColor: '#ff6f61' }]}
+              onPress={() => {
+                setIngredientsList([]);        // Clear the ingredients list
+                setRecipeLines([]);            // Clear the recipe lines
+                setCurrentIngredient('');      // Reset the current ingredient input
+                setSelectedServings(null);     // Reset the selected servings
+                setShowUpdateButton(false);    // Hide the "Update Recipe" button
+                setAlreadyUsed([]);            // Clear the already used substitutes
+              }}
+            >
+              <Text style={styles.buttonText}>Clear All</Text>
+            </TouchableOpacity>
           )}
-
 
           {/* Display recipe lines */}
           {!isLoading && recipeLines.length > 0 && (
@@ -302,6 +338,19 @@ const RecipeGenerator: React.FC = () => {
               recipeLines={recipeLines}
               substituteIngredient={substituteIngredient}
             />
+          )}
+
+          {/* Save Recipe Button */}
+          {!isLoading && recipeLines.length > 0 && (
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={saveRecipe}
+              disabled={isLoading}
+            >
+              <Text style={styles.saveButtonText}>
+                {isLoading ? 'Saving...' : 'Save'}
+              </Text>
+            </TouchableOpacity>
           )}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -433,6 +482,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000',
     textAlign: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#007BFF', // Blue color
+    padding: 15,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

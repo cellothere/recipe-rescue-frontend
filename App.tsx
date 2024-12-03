@@ -3,7 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme, TouchableOpacity } from 'react-native';
 import RecipeGenerator from './screens/RecipeGenerator';
-import { AllergyProvider } from './Context/AllergyContent';
+import { AllergyProvider } from './Context/AllergyContext';
+import { UserProvider } from './Context/UserContext'; // Import UserProvider
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -112,11 +113,13 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => (
-  <AuthProvider>
-    <AllergyProvider>
-      <AppContent />
-    </AllergyProvider>
-  </AuthProvider>
+  <UserProvider> {/* UserProvider should wrap AuthProvider */}
+    <AuthProvider>
+      <AllergyProvider>
+        <AppContent />
+      </AllergyProvider>
+    </AuthProvider>
+  </UserProvider>
 );
 
 export default App;
