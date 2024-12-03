@@ -107,7 +107,6 @@ function AuthStack() {
 
 const AppContent: React.FC = () => {
   const { authState } = useAuth();
-  console.log(authState.authenticated); // Debugging
 
   return (
     <NavigationContainer>

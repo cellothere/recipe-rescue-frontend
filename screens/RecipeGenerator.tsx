@@ -30,6 +30,7 @@ const RecipeGenerator: React.FC = () => {
     flex: 1,
   };
 
+  const [ingredients, setIngredients] = useState([]);
   const [originalServings, setOriginalServings] = useState<number | null>(null);
   const [showUpdateButton, setShowUpdateButton] = useState(false);
   const [alreadyUsed, setAlreadyUsed] = useState<string[]>([]);
@@ -44,6 +45,7 @@ const RecipeGenerator: React.FC = () => {
 
   const API_BASE_URL = 'http://192.168.1.66:5001/api';
   //192.168.0.9
+  
 
   // Picker Styles
   const pickerSelectStyles = StyleSheet.create({
@@ -67,6 +69,8 @@ const RecipeGenerator: React.FC = () => {
     setCurrentIngredient('');
   };
 
+  
+
   // Fetch Recipe Based on Ingredients
   const fetchRecipe = async () => {
     if (ingredientsList.length === 0) {
@@ -79,7 +83,7 @@ const RecipeGenerator: React.FC = () => {
       const payload = {
         ingredients: ingredientsList,
         allergies: allergies,
-        ...(selectedServings && { servings: selectedServings }),
+        ...(selectedServings && { servings: selectedServings })
       };
 
       const response = await axios.post(`${API_BASE_URL}/recipes/generate`, payload);
