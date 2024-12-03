@@ -22,7 +22,7 @@ import RNPickerSelect from 'react-native-picker-select';
 
 const RecipeGenerator: React.FC = () => {
   const { user } = useUser(); 
-  console.log(user)
+  //console.log(user)
   const isDarkMode = useColorScheme() === 'dark';
   const pickerRef = useRef<RNPickerSelect | null>(null);
   const backgroundStyle = {
@@ -135,25 +135,22 @@ const RecipeGenerator: React.FC = () => {
 
   //save recipe
   const saveRecipe = async () => {
+    const mongoObjectUserId = user.userId
     if (!recipeTitle || ingredientsList.length === 0 || recipeLines.length === 0) {
       Alert.alert('Error', 'Please generate a recipe first.');
       return;
     }
-
     setIsLoading(true);
+
+    
     try {
-      
-      // Fetch the userId from the backend
-      const userResponse = await axios.get(`${API_BASE_URL}/users/username/${user}`);
-      const { userId } = userResponse.data;
       
       const payload = {
         name: recipeTitle.trim(),
         ingredients: ingredientsList,
         instructions: recipeLines.map((line) => line.original).join('\n'),
-        userId, // Use the fetched userId
+        userId: mongoObjectUserId, // Use the fetched userId
       };
-
       // Save the recipe
       const response = await axios.post(`${API_BASE_URL}/recipes/save`, payload);
       const { message } = response.data;
@@ -348,7 +345,7 @@ const RecipeGenerator: React.FC = () => {
               disabled={isLoading}
             >
               <Text style={styles.saveButtonText}>
-                {isLoading ? 'Saving...' : 'Save'}
+                {isLoading ? 'Saving...' : 'Save'} 
               </Text>
             </TouchableOpacity>
           )}
