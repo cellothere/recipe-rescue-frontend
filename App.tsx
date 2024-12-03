@@ -10,9 +10,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Allergies from './screens/Allergies';
 import MyKitchen from './screens/MyKitchen';
-import Profile from './screens/Profile';
+import SavedRecipes from './screens/SavedRecipes';
 import Settings from './screens/Settings';
 import Login from './screens/Login';
+import RecipeDetails from './screens/RecipeDetails';
 import { AuthProvider, useAuth } from './Context/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -22,6 +23,8 @@ export type RootStackParamList = {
   Home: undefined;
   Settings: undefined;
   Login: undefined;
+  SavedRecipes: undefined;
+  RecipeDetails: { recipeId: string };
 };
 
 declare global {
@@ -41,7 +44,7 @@ const SettingsTabs = () => (
   >
     <Tab.Screen name="Allergies" component={Allergies} />
     <Tab.Screen name="Kitchen" component={MyKitchen} />
-    <Tab.Screen name="Profile" component={Profile} />
+    <Tab.Screen name="Recipes" component={SavedRecipes} />
     <Tab.Screen name="Settings" component={Settings} />
   </Tab.Navigator>
 );
@@ -84,6 +87,7 @@ function RootStack() {
         component={SettingsTabs}
         options={{ title: 'Settings' }}
       />
+      <Stack.Screen name="RecipeDetails" component={RecipeDetails} />
     </Stack.Navigator>
   );
 }

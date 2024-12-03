@@ -145,12 +145,35 @@ const RecipeGenerator: React.FC = () => {
     
     try {
       
-      const payload = {
-        name: recipeTitle.trim(),
-        ingredients: ingredientsList,
-        instructions: recipeLines.map((line) => line.original).join('\n'),
-        userId: mongoObjectUserId, // Use the fetched userId
-      };
+/// Find the index of the instructions delimiter
+const instructionsStartIndex = recipeLines.findIndex((line) =>
+  line.original.includes('Instructions')
+);
+
+// Filter and clean the ingredients
+const recipeIngredients = recipeLines
+  .slice(0, instructionsStartIndex) // Get all lines before instructions
+  .map((line) => line.original.trim()) // Trim whitespace
+  .filter(
+    (line) =>
+      line && // Exclude empty lines
+      !line.startsWith('###') && // Exclude titles
+      !line.startsWith('**') // Exclude section headers like "Ingredients:"
+  )
+  .map((line) => line.replace(/^[-\d.]+/, '').trim()); // Remove prefixes like "-", "1.", "2."
+
+// Process and clean the instructions
+const recipeInstructions = recipeLines
+  .slice(instructionsStartIndex + 1) // Get all lines after the instructions header
+  .map((line) => line.original.trim()) // Trim whitespace
+  .join('\n'); // Combine instructions into a single string
+
+const payload = {
+  name: recipeTitle.trim(),
+  ingredients: recipeIngredients, // Cleaned ingredients
+  instructions: recipeInstructions, // Cleaned instructions
+  userId: mongoObjectUserId, // Use the fetched userId
+};
       // Save the recipe
       const response = await axios.post(`${API_BASE_URL}/recipes/save`, payload);
       const { message } = response.data;
