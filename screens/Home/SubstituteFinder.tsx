@@ -12,10 +12,14 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useAllergyContext } from '../../Context/AllergyContext'; // Import allergy context
+
 const SubstituteFinder: React.FC = () => {
   const [ingredient, setIngredient] = useState('');
   const [substitutes, setSubstitutes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [avoidAllergies, setAvoidAllergies] = useState(false); // Track toggle state
+
+  const { allergies } = useAllergyContext(); // Access allergies from context
 
   const API_BASE_URL = 'http://192.168.1.66:5001/api';
 
@@ -29,12 +33,12 @@ const SubstituteFinder: React.FC = () => {
     setSubstitutes([]); // Clear previous substitutes
 
     try {
-    
-        const response = await axios.post(`${API_BASE_URL}/substitute/generate`, {
-            ingredient
-        });
-     
+      const payload: any = { ingredient };
+      if (avoidAllergies && allergies.length > 0) {
+        payload.allergies = allergies; // Include allergies if toggle is on
+      }
 
+      const response = await axios.post(`${API_BASE_URL}/substitute/generate`, payload);
       const substituteData = response.data.substitute || '';
       const substituteArray = substituteData.split('\n').map((item) => item.trim());
       setSubstitutes(substituteArray);
@@ -58,6 +62,16 @@ const SubstituteFinder: React.FC = () => {
           value={ingredient}
           onChangeText={setIngredient}
         />
+
+        {/* Toggle Button */}
+        <TouchableOpacity
+          style={[styles.toggleButton, avoidAllergies ? styles.avoid : styles.ignore]}
+          onPress={() => setAvoidAllergies((prev) => !prev)}
+        >
+          <Text style={styles.toggleText}>
+            {avoidAllergies ? 'Avoid Allergies' : 'Ignore Allergies'}
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={fetchSubstitutes} disabled={isLoading}>
           <Text style={styles.buttonText}>{isLoading ? 'Loading...' : 'Find Substitutes'}</Text>
@@ -141,6 +155,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#555',
     marginBottom: 5,
+  },
+  toggleButton: {
+    padding: 10,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avoid: {
+    backgroundColor: '#36c190', // Green for avoiding
+  },
+  ignore: {
+    backgroundColor: '#ff6f61', // Red for ignoring
+  },
+  toggleText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

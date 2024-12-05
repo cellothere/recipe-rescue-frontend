@@ -38,7 +38,7 @@ declare global {
 
 /* Tabs for the settings-related screens */
 const SettingsTabs = () => (
-  <Tab.Navigator
+  <Tab.Navigator id={"settingsTabs" as undefined}
     screenOptions={{
       tabBarActiveTintColor: '#36c190', // Active tab highlight color
       tabBarInactiveTintColor: '#000000',
@@ -56,6 +56,7 @@ const SettingsTabs = () => (
 /* Tabs for home-related screens */
 const HomeTabs = () => (
   <Tab.Navigator
+  id={"mainNav" as undefined}
     screenOptions={{
       tabBarActiveTintColor: '#36c190',
       tabBarInactiveTintColor: '#000000',
@@ -75,7 +76,8 @@ function RootStack() {
   const { onLogout } = useAuth(); // Access logout functionality
 
   return (
-    <Stack.Navigator initialRouteName="MainHome">
+    <Stack.Navigator initialRouteName="MainHome" id={"mainTabs" as undefined} >
+      
       <Stack.Screen
         name="MainHome"
         component={HomeTabs}
@@ -114,7 +116,7 @@ function RootStack() {
 /* Stack for authentication screens */
 function AuthStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator id={"loginNav" as undefined}>
       <Stack.Screen
         name="Login"
         component={Login}
