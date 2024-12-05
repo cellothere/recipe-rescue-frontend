@@ -8,14 +8,14 @@ import { UserProvider } from './Context/UserContext'; // UserProvider for managi
 import Icon from 'react-native-vector-icons/Ionicons';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
-import Allergies from './screens/Settings/Allergies';
-import MyKitchen from './screens/Settings/MyKitchen';
+import Allergies from './screens/Kitchen/Allergies';
+import MyKitchen from './screens/Kitchen/MyKitchen';
 import SubstituteFinder from './screens/Home/SubstituteFinder';
 import RecipeGenerator from './screens/Home/RecipeGenerator';
-import SavedRecipes from './screens/Settings/SavedRecipes';
-import Settings from './screens/Settings/Settings';
+import SavedRecipes from './screens/Kitchen/SavedRecipes';
+import Settings from './screens/Kitchen/Settings';
 import Login from './screens/Login';
-import RecipeDetails from './screens/Settings/RecipeDetails';
+import RecipeDetails from './screens/Kitchen/RecipeDetails';
 import { AuthProvider, useAuth } from './Context/AuthContext';
 
 const Stack = createNativeStackNavigator();
