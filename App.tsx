@@ -4,10 +4,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme, TouchableOpacity } from 'react-native';
 import RecipeFinder from './screens/Home/RecipeFinder';
 import { AllergyProvider } from './Context/AllergyContext';
-import { UserProvider } from './Context/UserContext'; // Import UserProvider
+import { UserProvider } from './Context/UserContext'; // UserProvider for managing user context
 import Icon from 'react-native-vector-icons/Ionicons';
-
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+
 import Allergies from './screens/Settings/Allergies';
 import MyKitchen from './screens/Settings/MyKitchen';
 import SubstituteFinder from './screens/Home/SubstituteFinder';
@@ -21,12 +21,13 @@ import { AuthProvider, useAuth } from './Context/AuthContext';
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
 
+/* Define the navigation types for better type safety */
 export type RootStackParamList = {
   Home: undefined;
   Settings: undefined;
   Login: undefined;
   SavedRecipes: undefined;
-  RecipeDetails: { recipeId: string };
+  RecipeDetails: { recipeId: string }; // RecipeDetails expects a recipeId
 };
 
 declare global {
@@ -35,13 +36,14 @@ declare global {
   }
 }
 
+/* Tabs for the settings-related screens */
 const SettingsTabs = () => (
   <Tab.Navigator
     screenOptions={{
-      tabBarActiveTintColor: '#36c190',
+      tabBarActiveTintColor: '#36c190', // Active tab highlight color
       tabBarInactiveTintColor: '#000000',
       tabBarLabelStyle: { fontSize: 16, color: '#000000' },
-      tabBarStyle: { backgroundColor: '#f7f9fc' },
+      tabBarStyle: { backgroundColor: '#f7f9fc' }, // Background color for tabs
     }}
   >
     <Tab.Screen name="Allergies" component={Allergies} />
@@ -51,6 +53,7 @@ const SettingsTabs = () => (
   </Tab.Navigator>
 );
 
+/* Tabs for home-related screens */
 const HomeTabs = () => (
   <Tab.Navigator
     screenOptions={{
@@ -66,39 +69,38 @@ const HomeTabs = () => (
   </Tab.Navigator>
 );
 
-
+/* Root stack for the main app flow */
 function RootStack() {
-  const isDarkMode = useColorScheme() === 'dark';
-  const { onLogout } = useAuth(); // Access the logout function
+  const isDarkMode = useColorScheme() === 'dark'; // Detect if dark mode is active
+  const { onLogout } = useAuth(); // Access logout functionality
 
   return (
     <Stack.Navigator initialRouteName="MainHome">
       <Stack.Screen
-  name="MainHome"
-  component={HomeTabs}
-  options={({ navigation }) => ({
-    title: 'Recipe Generator',
-    headerLeft: () => (
-      <TouchableOpacity
-        onPress={async () => {
-          await onLogout();
-        }}
-        style={{ marginLeft: 10 }}
-      >
-        <Icon name="log-out-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
-      </TouchableOpacity>
-    ),
-    headerRight: () => (
-      <TouchableOpacity
-        onPress={() => navigation.navigate('SettingsTabs')}
-        style={{ marginRight: 10 }}
-      >
-        <Icon name="settings" size={30} color={isDarkMode ? '#fff' : '#000'} />
-      </TouchableOpacity>
-    ),
-  })}
-/>
-
+        name="MainHome"
+        component={HomeTabs}
+        options={({ navigation }) => ({
+          title: 'Recipe Generator',
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={async () => {
+                await onLogout();
+              }}
+              style={{ marginLeft: 10 }}
+            >
+              <Icon name="log-out-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('SettingsTabs')}
+              style={{ marginRight: 10 }}
+            >
+              <Icon name="settings" size={30} color={isDarkMode ? '#fff' : '#000'} />
+            </TouchableOpacity>
+          ),
+        })}
+      />
       <Stack.Screen
         name="SettingsTabs"
         component={SettingsTabs}
@@ -109,7 +111,7 @@ function RootStack() {
   );
 }
 
-
+/* Stack for authentication screens */
 function AuthStack() {
   return (
     <Stack.Navigator>
@@ -122,8 +124,9 @@ function AuthStack() {
   );
 }
 
+/* App content to switch between authenticated and unauthenticated flows */
 const AppContent: React.FC = () => {
-  const { authState } = useAuth();
+  const { authState } = useAuth(); // Access authentication state
 
   return (
     <NavigationContainer>
@@ -132,8 +135,9 @@ const AppContent: React.FC = () => {
   );
 };
 
+/* Main App component with context providers */
 const App: React.FC = () => (
-  <UserProvider> {/* UserProvider should wrap AuthProvider */}
+  <UserProvider>
     <AuthProvider>
       <AllergyProvider>
         <AppContent />
