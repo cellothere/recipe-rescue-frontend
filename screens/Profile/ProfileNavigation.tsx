@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Settings: React.FC = () => {
+const ProfileNavigation: React.FC = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
@@ -22,4 +22,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Settings;
+export default ProfileNavigation;

@@ -13,9 +13,11 @@ import MyKitchen from './screens/Kitchen/MyKitchen';
 import SubstituteFinder from './screens/Home/SubstituteFinder';
 import RecipeGenerator from './screens/Home/RecipeGenerator';
 import SavedRecipes from './screens/Kitchen/SavedRecipes';
-import Settings from './screens/Kitchen/Settings';
 import Login from './screens/Login';
 import RecipeDetails from './screens/Kitchen/RecipeDetails';
+import ProfileNavigation from './screens/Profile/ProfileNavigation';
+import AppSettings from './screens/Profile/AppSettings'
+import ProfileSettings from './screens/Profile/ProfileSettings'
 import { AuthProvider, useAuth } from './Context/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -36,9 +38,9 @@ declare global {
   }
 }
 
-/* Tabs for the settings-related screens */
-const SettingsTabs = () => (
-  <Tab.Navigator id={"settingsTabs" as undefined}
+/* Tabs for the kitchen-related screens */
+const KitchenTabs = () => (
+  <Tab.Navigator id={"KitchenTabs" as undefined}
     screenOptions={{
       tabBarActiveTintColor: '#36c190', // Active tab highlight color
       tabBarInactiveTintColor: '#000000',
@@ -49,7 +51,21 @@ const SettingsTabs = () => (
     <Tab.Screen name="Allergies" component={Allergies} />
     <Tab.Screen name="Kitchen" component={MyKitchen} />
     <Tab.Screen name="Recipes" component={SavedRecipes} />
-    <Tab.Screen name="Settings" component={Settings} />
+  </Tab.Navigator>
+);
+
+/* Tabs for the settings-related screens */
+const ProfileTabs = () => (
+  <Tab.Navigator id={"ProfileTabs" as undefined}
+    screenOptions={{
+      tabBarActiveTintColor: '#36c190', // Active tab highlight color
+      tabBarInactiveTintColor: '#000000',
+      tabBarLabelStyle: { fontSize: 16, color: '#000000' },
+      tabBarStyle: { backgroundColor: '#f7f9fc' }, // Background color for tabs
+    }}
+  >
+    <Tab.Screen name="AppSettings" component={AppSettings} />
+    <Tab.Screen name="ProfileSettings" component={ProfileSettings} />
   </Tab.Navigator>
 );
 
@@ -85,9 +101,7 @@ function RootStack() {
           title: 'Recipe Generator',
           headerLeft: () => (
             <TouchableOpacity
-              onPress={async () => {
-                await onLogout();
-              }}
+            onPress={() => navigation.navigate('ProfileTabs')}
               style={{ marginLeft: 10 }}
             >
               <Icon name="person-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
@@ -95,7 +109,7 @@ function RootStack() {
           ),
           headerRight: () => (
             <TouchableOpacity
-              onPress={() => navigation.navigate('SettingsTabs')}
+              onPress={() => navigation.navigate('KitchenTabs')}
               style={{ marginRight: 10 }}
             >
               <Icon name="restaurant-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
@@ -104,8 +118,13 @@ function RootStack() {
         })}
       />
       <Stack.Screen
-        name="SettingsTabs"
-        component={SettingsTabs}
+        name="ProfileTabs"
+        component={ProfileTabs}
+        options={{ title: 'Settings' }}
+      />
+      <Stack.Screen
+        name="KitchenTabs"
+        component={KitchenTabs}
         options={{ title: 'Settings' }}
       />
       <Stack.Screen name="RecipeDetails" component={RecipeDetails} />
