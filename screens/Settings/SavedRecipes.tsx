@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
-import { useUser } from '../Context/UserContext';
+import { useUser } from '../../Context/UserContext';
 
 const SavedRecipes: React.FC = () => {
   const { user } = useUser(); // Access the user context

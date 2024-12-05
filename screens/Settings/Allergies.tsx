@@ -10,7 +10,7 @@ import {
   FlatList,
   LayoutAnimation,
 } from 'react-native';
-import { useAllergyContext } from '../Context/AllergyContext';
+import { useAllergyContext } from '../../Context/AllergyContext';
 
 const Allergies: React.FC = () => {
   const { allergies, setAllergies } = useAllergyContext();

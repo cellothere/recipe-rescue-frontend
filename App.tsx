@@ -2,18 +2,20 @@ import React, { Component } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme, TouchableOpacity } from 'react-native';
-import RecipeGenerator from './screens/RecipeGenerator';
+import RecipeFinder from './screens/Home/RecipeFinder';
 import { AllergyProvider } from './Context/AllergyContext';
 import { UserProvider } from './Context/UserContext'; // Import UserProvider
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Allergies from './screens/Allergies';
-import MyKitchen from './screens/MyKitchen';
-import SavedRecipes from './screens/SavedRecipes';
-import Settings from './screens/Settings';
+import Allergies from './screens/Settings/Allergies';
+import MyKitchen from './screens/Settings/MyKitchen';
+import SubstituteFinder from './screens/Home/SubstituteFinder';
+import RecipeGenerator from './screens/Home/RecipeGenerator';
+import SavedRecipes from './screens/Settings/SavedRecipes';
+import Settings from './screens/Settings/Settings';
 import Login from './screens/Login';
-import RecipeDetails from './screens/RecipeDetails';
+import RecipeDetails from './screens/Settings/RecipeDetails';
 import { AuthProvider, useAuth } from './Context/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -49,39 +51,54 @@ const SettingsTabs = () => (
   </Tab.Navigator>
 );
 
+const HomeTabs = () => (
+  <Tab.Navigator
+    screenOptions={{
+      tabBarActiveTintColor: '#36c190',
+      tabBarInactiveTintColor: '#000000',
+      tabBarLabelStyle: { fontSize: 16, color: '#000000' },
+      tabBarStyle: { backgroundColor: '#f7f9fc' },
+    }}
+  >
+    <Tab.Screen name="Recipe Finder" component={RecipeFinder} />
+    <Tab.Screen name="Recipe Generator" component={RecipeGenerator} />
+    <Tab.Screen name="Substitute" component={SubstituteFinder} />
+  </Tab.Navigator>
+);
+
+
 function RootStack() {
   const isDarkMode = useColorScheme() === 'dark';
   const { onLogout } = useAuth(); // Access the logout function
 
   return (
-    <Stack.Navigator initialRouteName="Home">
+    <Stack.Navigator initialRouteName="MainHome">
       <Stack.Screen
-        name="Home"
-        component={RecipeGenerator}
-        options={({ navigation }) => ({
-          title: 'Recipe Generator',
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={async () => {
-                await onLogout(); // Clear authentication state
-                // No manual navigation needed; state will handle screen switching
-              }}
-              style={{ marginLeft: 10 }}
-            >
-              <Icon name="log-out-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
-            </TouchableOpacity>
-          ),
-          
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate('SettingsTabs')}
-              style={{ marginRight: 10 }}
-            >
-              <Icon name="settings" size={30} color={isDarkMode ? '#fff' : '#000'} />
-            </TouchableOpacity>
-          ),
-        })}
-      />
+  name="MainHome"
+  component={HomeTabs}
+  options={({ navigation }) => ({
+    title: 'Recipe Generator',
+    headerLeft: () => (
+      <TouchableOpacity
+        onPress={async () => {
+          await onLogout();
+        }}
+        style={{ marginLeft: 10 }}
+      >
+        <Icon name="log-out-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
+      </TouchableOpacity>
+    ),
+    headerRight: () => (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('SettingsTabs')}
+        style={{ marginRight: 10 }}
+      >
+        <Icon name="settings" size={30} color={isDarkMode ? '#fff' : '#000'} />
+      </TouchableOpacity>
+    ),
+  })}
+/>
+
       <Stack.Screen
         name="SettingsTabs"
         component={SettingsTabs}

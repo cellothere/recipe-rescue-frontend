@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import axios from 'axios';
-import RecipeLines from '../components/RecipeLines';
+import RecipeLines from '../../components/RecipeLines';
 
 const RecipeDetails: React.FC = ({ route }: any) => {
   const { recipeId } = route.params; // Extract the recipe ID from route params

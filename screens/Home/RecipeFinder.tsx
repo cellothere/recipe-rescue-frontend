@@ -14,13 +14,13 @@ import {
   Platform
 } from 'react-native';
 import axios from 'axios';
-import { useAllergyContext } from '../Context/AllergyContext'; // Import allergy context
-import LoadingIcon from '../components/LoadingIcon';
-import RecipeLines from '../components/RecipeLines'; // Import the RecipeLines component
-import { useUser } from '../Context/UserContext';
+import { useAllergyContext } from '../../Context/AllergyContext'; // Import allergy context
+import LoadingIcon from '../../components/LoadingIcon';
+import RecipeLines from '../../components/RecipeLines'; // Import the RecipeLines component
+import { useUser } from '../../Context/UserContext';
 import RNPickerSelect from 'react-native-picker-select';
 
-const RecipeGenerator: React.FC = () => {
+const RecipeFinder: React.FC = () => {
   const { user } = useUser(); 
   //console.log(user)
   const isDarkMode = useColorScheme() === 'dark';
@@ -522,4 +522,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RecipeGenerator;
+export default RecipeFinder;
