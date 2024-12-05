@@ -90,7 +90,7 @@ function RootStack() {
               }}
               style={{ marginLeft: 10 }}
             >
-              <Icon name="log-out-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
+              <Icon name="person-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
             </TouchableOpacity>
           ),
           headerRight: () => (
@@ -98,7 +98,7 @@ function RootStack() {
               onPress={() => navigation.navigate('SettingsTabs')}
               style={{ marginRight: 10 }}
             >
-              <Icon name="settings" size={30} color={isDarkMode ? '#fff' : '#000'} />
+              <Icon name="restaurant-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
             </TouchableOpacity>
           ),
         })}
