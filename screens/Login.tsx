@@ -1,25 +1,18 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../Context/AuthContext';
 
 const Login = () => {
     const [username, setusername] = useState('');
     const [password, setPassword] = useState('');
-    const { onLogin, onRegister } = useAuth();
+    const { onLogin } = useAuth();
+    const navigation = useNavigation();
 
     const login = async () => {
         const result = await onLogin!(username, password);
         if (result && result.error) {
             alert(result.msg);
-        }
-    };
-
-    const register = async () => {
-        const result = await onRegister!(username, password);
-        if (result && result.error) {
-            alert(result.msg);
-        } else {
-            login();
         }
     };
 
@@ -43,9 +36,12 @@ const Login = () => {
             <TouchableOpacity style={styles.button} onPress={login}>
                 <Text style={styles.buttonText}>Login</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={register}>
-                <Text style={styles.buttonText}>Register</Text>
-            </TouchableOpacity>
+            <Text
+                style={styles.registerText}
+                onPress={() => navigation.navigate('Register')}
+            >
+                Don't have an account? Click here to register
+            </Text>
         </View>
     );
 };
@@ -86,6 +82,12 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    registerText: {
+        color: '#36c190',
+        fontSize: 14,
+        textDecorationLine: 'underline',
+        marginTop: 15,
     },
 });
 

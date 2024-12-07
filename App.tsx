@@ -19,6 +19,7 @@ import ProfileNavigation from './screens/Profile/ProfileNavigation';
 import AppSettings from './screens/Profile/AppSettings'
 import ProfileSettings from './screens/Profile/ProfileSettings'
 import { AuthProvider, useAuth } from './Context/AuthContext';
+import Register from './screens/Register';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
@@ -28,6 +29,7 @@ export type RootStackParamList = {
   Home: undefined;
   Settings: undefined;
   Login: undefined;
+  Register: undefined;
   SavedRecipes: undefined;
   RecipeDetails: { recipeId: string }; // RecipeDetails expects a recipeId
 };
@@ -141,6 +143,10 @@ function AuthStack() {
         component={Login}
         options={{ title: 'Login' }}
       />
+      <Stack.Screen 
+      name="Register" 
+      component={Register} 
+      options={{ title: 'Register' }} />
     </Stack.Navigator>
   );
 }

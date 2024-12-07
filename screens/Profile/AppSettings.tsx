@@ -15,7 +15,6 @@ const AppSettings: React.FC = () => {
       <TouchableOpacity
         onPress={async () => {
           try {
-            console.log(process.env.EXPO_PUBLIC_API_URL)
             await onLogout(); // Call the logout function
           } catch (error) {
             console.error('Logout failed:', error); // Handle logout errors
