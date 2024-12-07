@@ -94,7 +94,11 @@ const RecipeFinder: React.FC = () => {
       }));
 
       setRecipeLines(updatedRecipeLines);
-      setRecipeTitle(recipeArray[0].replace(/[*_#~`]/g, ''));
+      setRecipeTitle(
+        recipeArray[0]
+            .replace(/[*_#~`]/g, '') // Removes unwanted characters
+            .replace(/assistant > /gi, '') // Removes "assistant > " (case-insensitive)
+    );    
       setOriginalServings(selectedServings); // Set the initial serving size
       setShowUpdateButton(false); // Reset button visibility
     } catch (error) {
