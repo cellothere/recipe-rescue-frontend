@@ -14,7 +14,7 @@ const RecipeDetails: React.FC = ({ route }: any) => {
   const { recipeId } = route.params; // Extract the recipe ID from route params
   const [recipe, setRecipe] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const API_BASE_URL = 'http://192.168.1.66:5001/api';
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
   useEffect(() => {
     const fetchRecipe = async () => {

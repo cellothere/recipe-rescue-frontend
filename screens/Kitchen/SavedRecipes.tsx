@@ -21,7 +21,7 @@ const SavedRecipes: React.FC = () => {
   const [filteredRecipes, setFilteredRecipes] = useState<any[]>([]); // State for filtered recipes
   const [searchQuery, setSearchQuery] = useState<string>(''); // Search query state
   const [isLoading, setIsLoading] = useState<boolean>(true); // Loading state
-  const API_BASE_URL = 'http://192.168.1.66:5001/api'; // Update to your API's base URL
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL; // Update to your API's base URL
   const navigation = useNavigation(); // Navigation hook
 
   useEffect(() => {

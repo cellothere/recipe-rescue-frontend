@@ -11,7 +11,7 @@ interface AuthProps {
 }
 
 const TOKEN_KEY = 'my-jwt';
-export const API_URL = 'http://192.168.1.66:5001/api';
+export const API_URL = process.env.EXPO_PUBLIC_API_URL;
 const AuthContext = createContext<AuthProps>({
     authState: { token: null, authenticated: false }, // Provide a default state
     onRegister: async () => {}, // No-op functions for defaults

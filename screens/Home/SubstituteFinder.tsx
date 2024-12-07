@@ -21,7 +21,7 @@ const SubstituteFinder: React.FC = () => {
 
   const { allergies } = useAllergyContext(); // Access allergies from context
 
-  const API_BASE_URL = 'http://192.168.1.66:5001/api';
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
   const fetchSubstitutes = async () => {
     if (!ingredient.trim()) {

@@ -43,7 +43,7 @@ const RecipeFinder: React.FC = () => {
   const [selectedServings, setSelectedServings] = useState<number | null>(null);
 
 
-  const API_BASE_URL = 'http://192.168.1.66:5001/api';
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
  
   // Picker Styles
   const pickerSelectStyles = StyleSheet.create({

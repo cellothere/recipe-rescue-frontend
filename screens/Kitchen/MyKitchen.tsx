@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, FlatList, Alert } from 'react-native';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.1.66:5001/api'; // Update to your API's base URL
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL; // Update to your API's base URL
 const userId = '674dee46c3be33428e0bfff7'; // Replace with the actual user ID
 
 const MyKitchen: React.FC = () => {
