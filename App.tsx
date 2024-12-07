@@ -16,6 +16,7 @@ import SavedRecipes from './screens/Kitchen/SavedRecipes';
 import Login from './screens/Login';
 import RecipeDetails from './screens/Kitchen/RecipeDetails';
 import ProfileNavigation from './screens/Profile/ProfileNavigation';
+import Home from './screens/Home';
 import AppSettings from './screens/Profile/AppSettings'
 import ProfileSettings from './screens/Profile/ProfileSettings'
 import { AuthProvider, useAuth } from './Context/AuthContext';
@@ -72,14 +73,15 @@ const ProfileTabs = () => (
 );
 
 /* Tabs for home-related screens */
+/* Tabs for home-related screens */
 const HomeTabs = () => (
   <Tab.Navigator
-  id={"mainNav" as undefined}
+    id={"mainNav" as undefined}
     screenOptions={{
-      tabBarActiveTintColor: '#36c190',
+      tabBarActiveTintColor: '#36c190', // Active tab highlight color
       tabBarInactiveTintColor: '#000000',
       tabBarLabelStyle: { fontSize: 16, color: '#000000' },
-      tabBarStyle: { backgroundColor: '#f7f9fc' },
+      tabBarStyle: { backgroundColor: '#f7f9fc' }, // Background color for tabs
     }}
   >
     <Tab.Screen name="Recipe Finder" component={RecipeFinder} />
@@ -88,22 +90,22 @@ const HomeTabs = () => (
   </Tab.Navigator>
 );
 
+
 /* Root stack for the main app flow */
 function RootStack() {
-  const isDarkMode = useColorScheme() === 'dark'; // Detect if dark mode is active
-  const { onLogout } = useAuth(); // Access logout functionality
+  const isDarkMode = useColorScheme() === 'dark'; 
+  const { onLogout } = useAuth(); 
 
   return (
-    <Stack.Navigator initialRouteName="MainHome" id={"mainTabs" as undefined} >
-      
+    <Stack.Navigator initialRouteName="Home" id={"mainTabs" as undefined}>
       <Stack.Screen
-        name="MainHome"
-        component={HomeTabs}
+        name="Home"
+        component={Home}
         options={({ navigation }) => ({
-          title: 'Recipe Generator',
+          title: 'Dashboard',
           headerLeft: () => (
             <TouchableOpacity
-            onPress={() => navigation.navigate('ProfileTabs')}
+              onPress={() => navigation.navigate('ProfileTabs')}
               style={{ marginLeft: 10 }}
             >
               <Icon name="person-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
@@ -120,6 +122,11 @@ function RootStack() {
         })}
       />
       <Stack.Screen
+        name="HomeTabs" 
+        component={HomeTabs}
+        options={{ headerShown: true }}
+      />
+      <Stack.Screen
         name="ProfileTabs"
         component={ProfileTabs}
         options={{ title: 'Settings' }}
@@ -133,6 +140,7 @@ function RootStack() {
     </Stack.Navigator>
   );
 }
+
 
 /* Stack for authentication screens */
 function AuthStack() {
