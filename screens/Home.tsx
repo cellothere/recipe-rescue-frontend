@@ -3,14 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity, useColorScheme } from 'react-
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useUser } from '../Context/UserContext';
 
 const Home: React.FC = () => {
   const navigation = useNavigation();
   const isDarkMode = useColorScheme() === 'dark';
+  const { user } = useUser();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Your Dashboard</Text>
+      <Text style={styles.title}>Welcome, {user.username}</Text>
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate('HomeTabs', { screen: 'Recipe Generator' })}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../Context/AuthContext';
+import { AuthProvider, useAuth } from '../Context/AuthContext';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');

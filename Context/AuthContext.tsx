@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { useUser } from './UserContext'; // Import UserContext
+import LoadingIcon from '../components/LoadingIcon';
 
 interface AuthProps {
     authState?: { token: string | null; authenticated: boolean | null };
@@ -31,23 +32,41 @@ export const AuthProvider = ({ children }: any) => {
         authenticated: boolean | null;
     }>({ token: null, authenticated: null });
 
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         const loadToken = async () => {
-            const token = await SecureStore.getItemAsync(TOKEN_KEY);
-            if (token) {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                setAuthState({
-                    token: token,
-                    authenticated: true,
-                });
-                // Fetch user details with the token
-                const userResponse = await axios.get(`${API_URL}/auth/user`);
-                setUser(userResponse.data); // Update the user in UserContext
+            try {
+                const token = await SecureStore.getItemAsync(TOKEN_KEY);
+                if (token) {
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    try {
+                        const userResponse = await axios.get(`${API_URL}/auth/user`);
+                        setAuthState({ token, authenticated: true });
+                        setUser(userResponse.data);
+                    } catch (e) {
+                        console.error('Token invalid or expired:', e);
+                        await SecureStore.deleteItemAsync(TOKEN_KEY);
+                        setAuthState({ token: null, authenticated: false });
+                    }
+                } else {
+                    setAuthState({ token: null, authenticated: false });
+                }
+            } catch (e) {
+                console.error('Error loading token:', e);
+            } finally {
+                setLoading(false);
             }
         };
         
+    
         loadToken();
     }, []);
+    
+    if (loading) {
+        return < LoadingIcon />; // Show a spinner or placeholder while loading
+    }
+    
 
 
     const register = async (username: string, password: string) => {
@@ -70,13 +89,10 @@ export const AuthProvider = ({ children }: any) => {
                 token: result.data.accessToken,
                 authenticated: true,
             });
+            setUser(result.data.user)
             axios.defaults.headers.common['Authorization'] = `Bearer ${result.data.accessToken}`;
             await SecureStore.setItemAsync(TOKEN_KEY, result.data.accessToken);
 
-            // Fetch and set the user details
-            const userResponse = await axios.get(`${API_URL}/users/username/${username}`);
-            setUser(userResponse.data); // Update the user in UserContext
-            
             return result;
         } catch (e) {
             return { error: true, msg: (e as any).response.data.message };
@@ -85,18 +101,15 @@ export const AuthProvider = ({ children }: any) => {
 
     const logout = async () => {
         try {
-            await axios.post(`${API_URL}/auth/logout`);
             await SecureStore.deleteItemAsync(TOKEN_KEY);
-            axios.defaults.headers.common['Authorization'] = '';
-            setAuthState({
-                token: null,
-                authenticated: false,
-            });
-            setUser(null); // Clear user data in UserContext
+            delete axios.defaults.headers.common['Authorization'];
+            setAuthState({ token: null, authenticated: false });
+            setUser(null); // Clear user data
         } catch (e) {
             console.error('Logout failed:', e);
         }
     };
+    
 
     return (
         <AuthContext.Provider value={{ onRegister: register, onLogin: login, onLogout: logout, authState }}>

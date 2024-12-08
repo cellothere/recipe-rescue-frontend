@@ -1,18 +1,29 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../Context/AuthContext';
+import { useUser } from '../Context/UserContext';
 
 const Login = () => {
-    const [username, setusername] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const { onLogin } = useAuth();
+    const { setUser } = useUser(); // Access setUser from UserContext
     const navigation = useNavigation();
 
     const login = async () => {
-        const result = await onLogin!(username, password);
-        if (result && result.error) {
-            alert(result.msg);
+        try {
+            const result = await onLogin!(username, password);
+            
+            if (result && result.error) {
+                Alert.alert('Error', result.msg);
+            } else if (result && result.user) {
+
+                navigation.navigate('Home');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            Alert.alert('Error', 'Something went wrong. Please try again.');
         }
     };
 
@@ -21,9 +32,9 @@ const Login = () => {
             <Text style={styles.title}>Login</Text>
             <TextInput
                 style={styles.input}
-                placeholder="username"
+                placeholder="Username"
                 value={username}
-                onChangeText={(text: string) => setusername(text)}
+                onChangeText={(text: string) => setUsername(text)}
                 autoCapitalize="none"
             />
             <TextInput
