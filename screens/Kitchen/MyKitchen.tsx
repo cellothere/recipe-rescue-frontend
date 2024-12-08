@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, FlatList, Alert } from 'react-native';
 import axios from 'axios';
+import { useUser } from '../../Context/UserContext';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL; // Update to your API's base URL
-const userId = '674dee46c3be33428e0bfff7'; // Replace with the actual user ID
+ // Replace with the actual user ID
 
 const MyKitchen: React.FC = () => {
   const [ingredients, setIngredients] = useState([]);
   const [ingredientName, setIngredientName] = useState('');
   const [measurementType, setMeasurementType] = useState('');
   const [amount, setAmount] = useState('');
+  const { user } = useUser();
+  const userId = user.userId;
 
   // Fetch ingredients on component mount
   useEffect(() => {
