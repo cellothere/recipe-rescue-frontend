@@ -36,18 +36,29 @@ const SavedRecipes: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(`${API_BASE_URL}/users/${user.userId}/recipes`);
-      const sortedRecipes = response.data.sort(
-        (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  
+      const recipes = Array.isArray(response.data) ? response.data : [];
+      const sortedRecipes = recipes.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
+  
       setSavedRecipes(sortedRecipes);
       setFilteredRecipes(sortedRecipes);
     } catch (error) {
-      console.error('Error fetching saved recipes:', error);
-      Alert.alert('Error', 'Failed to fetch saved recipes.');
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        console.warn('No recipes found for this user.');
+        setSavedRecipes([]);
+        setFilteredRecipes([]);
+      } else {
+        console.error('Error fetching saved recipes:', error);
+        Alert.alert('Error', 'Failed to fetch saved recipes.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
+  
+  
 
   const handleSearch = () => {
     if (searchQuery.trim() === '') {

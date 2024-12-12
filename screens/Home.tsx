@@ -15,7 +15,7 @@ const Home: React.FC = () => {
       <Text style={styles.title}>Welcome, {user.username}</Text>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('HomeTabs', { screen: 'Recipe Generator' })}
+        onPress={() => navigation.navigate('HomeTabs', { screen: 'Recipe Finder' })}
       >
         <View style={styles.iconTextContainer}>
       <MaterialIcon name="silverware-clean" size={30} color={isDarkMode ? '#fff' : '#000'} />
@@ -42,6 +42,16 @@ const Home: React.FC = () => {
         </View>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('KitchenTabs', { screen: 'Recipes' })}
+      >
+        <View style={styles.iconTextContainer}>
+          <Icon name="trending-up-sharp" size={30} color={isDarkMode ? '#fff' : '#000'} />
+          <Text style={styles.buttonText}>Popular recipes</Text>
+        </View>
+      </TouchableOpacity>
+
     </View>
   );
 };
@@ -64,17 +74,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     width: '80%',
-    alignItems: 'center',
+    flexDirection: 'row', // Ensure the button layout is horizontal
+    alignItems: 'center', // Vertically align icon and text
   },
   buttonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+    flex: 1, // Take up the remaining space
+    textAlign: 'center', // Center the text
   },
   iconTextContainer: {
     flexDirection: 'row',
     alignItems: 'center', // Vertically align items
   },
 });
+
 
 export default Home;

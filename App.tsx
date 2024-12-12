@@ -6,7 +6,10 @@ import RecipeFinder from './screens/Home/RecipeFinder';
 import { AllergyProvider } from './Context/AllergyContext';
 import { UserProvider } from './Context/UserContext'; // UserProvider for managing user context
 import Icon from 'react-native-vector-icons/Ionicons';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 
 import Allergies from './screens/Kitchen/Allergies';
 import MyKitchen from './screens/Kitchen/MyKitchen';
@@ -24,6 +27,7 @@ import Register from './screens/Register';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialTopTabNavigator();
+const BottomTab = createBottomTabNavigator();
 
 /* Define the navigation types for better type safety */
 export type RootStackParamList = {
@@ -74,7 +78,7 @@ const ProfileTabs = () => (
 
 /* Tabs for home-related screens */
 /* Tabs for home-related screens */
-const HomeTabs = () => (
+const CookingTabs = () => (
   <Tab.Navigator
     id={"mainNav" as undefined}
     screenOptions={{
@@ -86,21 +90,74 @@ const HomeTabs = () => (
   >
     <Tab.Screen name="Recipe Finder" component={RecipeFinder} />
     <Tab.Screen name="Recipe Generator" component={RecipeGenerator} />
-    <Tab.Screen name="Substitute" component={SubstituteFinder} />
   </Tab.Navigator>
 );
+
+const BottomTabs = () => {
+  const isDarkMode = useColorScheme() === 'dark';
+
+  return (
+    <BottomTab.Navigator
+      id={"bottomTabs" as undefined}
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
+          let iconComponent = Icon;
+          let iconName;
+
+          if (route.name === 'Home') {
+            iconName = 'pot-mix-outline';
+            iconComponent = MaterialIcon; // Use MaterialCommunityIcons for 'pot-mix'
+          } else if (route.name === 'Kitchen') {
+            iconName = 'restaurant-outline';
+          } else if (route.name === 'Profile') {
+            iconName = 'person-outline';
+          } else if (route.name === 'Substitute') {
+            iconName = 'swap-horizontal';
+          }
+
+          return React.createElement(iconComponent, { name: iconName, size, color });
+        },
+        tabBarActiveTintColor: '#36c190',
+        tabBarInactiveTintColor: isDarkMode ? '#ccc' : '#000',
+        tabBarStyle: { backgroundColor: isDarkMode ? '#000' : '#f7f9fc' },
+      })}
+    >
+            <BottomTab.Screen
+        name="Home"
+        component={CookingTabs}
+        options={{ title: 'Cook' }}
+      />
+            <BottomTab.Screen
+        name="Substitute"
+        component={SubstituteFinder}
+        options={{ title: 'Substitute' }}
+      />
+      <BottomTab.Screen
+        name="Kitchen"
+        component={KitchenTabs}
+        options={{ title: 'My Kitchen' }}
+      />
+      <BottomTab.Screen
+        name="Profile"
+        component={ProfileTabs}
+        options={{ title: 'Profile' }}
+      />
+    </BottomTab.Navigator>
+  );
+};
 
 
 /* Root stack for the main app flow */
 function RootStack() {
-  const isDarkMode = useColorScheme() === 'dark'; 
-  const { onLogout } = useAuth(); 
+  const isDarkMode = useColorScheme() === 'dark';
+  const { onLogout } = useAuth();
 
   return (
-    <Stack.Navigator initialRouteName="Home" id={"mainTabs" as undefined}>
+    <Stack.Navigator initialRouteName="BottomTabs" id={"bottomTabNav" as undefined}>
+      {/* Bottom Tabs */}
       <Stack.Screen
-        name="Home"
-        component={Home}
+        name="BottomTabs"
+        component={BottomTabs}
         options={({ navigation }) => ({
           title: 'Dashboard',
           headerLeft: () => (
@@ -119,24 +176,37 @@ function RootStack() {
               <Icon name="restaurant-outline" size={30} color={isDarkMode ? '#fff' : '#000'} />
             </TouchableOpacity>
           ),
+          headerShown: false, // Ensures the BottomTab header is used
         })}
       />
+
+      {/* Home Tabs */}
       <Stack.Screen
-        name="HomeTabs" 
-        component={HomeTabs}
+        name="CookingTabs"
+        component={CookingTabs}
         options={{ headerShown: true }}
       />
+
+      {/* Profile Tabs */}
       <Stack.Screen
         name="ProfileTabs"
         component={ProfileTabs}
         options={{ title: 'Settings' }}
       />
+
+      {/* Kitchen Tabs */}
       <Stack.Screen
         name="KitchenTabs"
         component={KitchenTabs}
-        options={{ title: 'Settings' }}
+        options={{ title: 'Kitchen' }}
       />
-      <Stack.Screen name="RecipeDetails" component={RecipeDetails} />
+
+      {/* Recipe Details */}
+      <Stack.Screen
+        name="RecipeDetails"
+        component={RecipeDetails}
+        options={{ title: 'Recipe Details' }}
+      />
     </Stack.Navigator>
   );
 }
