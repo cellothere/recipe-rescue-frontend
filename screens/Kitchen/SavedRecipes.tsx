@@ -16,13 +16,14 @@ import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../../Context/UserContext';
 
 const SavedRecipes: React.FC = () => {
-  const { user } = useUser(); // Access the user context
-  const [savedRecipes, setSavedRecipes] = useState<any[]>([]); // State to store recipes
-  const [filteredRecipes, setFilteredRecipes] = useState<any[]>([]); // State for filtered recipes
-  const [searchQuery, setSearchQuery] = useState<string>(''); // Search query state
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Loading state
-  const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL; // Update to your API's base URL
-  const navigation = useNavigation(); // Navigation hook
+  const { user } = useUser();
+  const [savedRecipes, setSavedRecipes] = useState<any[]>([]);
+  const [filteredRecipes, setFilteredRecipes] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [expandedRecipe, setExpandedRecipe] = useState<string | null>(null); // Expanded recipe state
+  const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchSavedRecipes();
@@ -36,29 +37,18 @@ const SavedRecipes: React.FC = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(`${API_BASE_URL}/users/${user.userId}/recipes`);
-  
       const recipes = Array.isArray(response.data) ? response.data : [];
       const sortedRecipes = recipes.sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
-  
       setSavedRecipes(sortedRecipes);
       setFilteredRecipes(sortedRecipes);
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        console.warn('No recipes found for this user.');
-        setSavedRecipes([]);
-        setFilteredRecipes([]);
-      } else {
-        console.error('Error fetching saved recipes:', error);
-        Alert.alert('Error', 'Failed to fetch saved recipes.');
-      }
+      handleError(error, 'Failed to fetch saved recipes.');
     } finally {
       setIsLoading(false);
     }
   };
-  
-  
 
   const handleSearch = () => {
     if (searchQuery.trim() === '') {
@@ -74,14 +64,10 @@ const SavedRecipes: React.FC = () => {
   const handleRemoveRecipe = (recipeId: string) => {
     Alert.alert(
       'Confirm Removal',
-      'Are you sure you wish to remove this recipe?',
+      'Are you sure you want to remove this recipe?',
       [
         { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => removeRecipe(recipeId),
-        },
+        { text: 'Remove', style: 'destructive', onPress: () => removeRecipe(recipeId) },
       ],
       { cancelable: true }
     );
@@ -92,12 +78,26 @@ const SavedRecipes: React.FC = () => {
       setIsLoading(true);
       await axios.patch(`${API_BASE_URL}/recipes/${recipeId}/remove-user`, { userId: user.userId });
       Alert.alert('Success', 'Recipe removed successfully.');
-      fetchSavedRecipes(); // Refresh the list
+      fetchSavedRecipes();
     } catch (error) {
-      console.error('Error removing recipe:', error);
-      Alert.alert('Error', 'Failed to remove the recipe.');
+      handleError(error, 'Failed to remove the recipe.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const toggleIngredients = (recipeId: string) => {
+    setExpandedRecipe(expandedRecipe === recipeId ? null : recipeId);
+  };
+
+  const handleError = (error: unknown, defaultMessage: string) => {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.warn('No recipes found for this user.');
+      setSavedRecipes([]);
+      setFilteredRecipes([]);
+    } else {
+      console.error(defaultMessage, error);
+      Alert.alert('Error', defaultMessage);
     }
   };
 
@@ -118,11 +118,25 @@ const SavedRecipes: React.FC = () => {
           {filteredRecipes.map((recipe) => (
             <View key={recipe._id} style={styles.recipeCard}>
               <Text style={styles.recipeName}>{recipe.name}</Text>
+              <TouchableOpacity onPress={() => toggleIngredients(recipe._id)}>
+                <Text style={styles.ingredientsText}>
+                  {expandedRecipe === recipe._id ? 'Hide Ingredients' : 'Show Ingredients'}
+                </Text>
+              </TouchableOpacity>
+              {expandedRecipe === recipe._id && (
+                <View style={styles.ingredientsList}>
+                  {recipe.ingredients.map((ingredient: string, index: number) => (
+                    <Text key={index} style={styles.ingredientItem}>
+                      - {ingredient}
+                    </Text>
+                  ))}
+                </View>
+              )}
               <TouchableOpacity
                 style={styles.detailsButton}
                 onPress={() => navigation.navigate('RecipeDetails', { recipeId: recipe._id })}
               >
-                <Text style={styles.detailsButtonText}>View Details</Text>
+                <Text style={styles.detailsButtonText}>View Recipe</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.removeButton}
@@ -143,17 +157,19 @@ const SavedRecipes: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    margin: 2,
     backgroundColor: '#f2f2f2',
     padding: 20,
   },
   scrollContainer: {
     paddingVertical: 10,
+    margin: 10,
   },
   title: {
+    marginTop: 10,
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    marginTop: 20,
     textAlign: 'center',
     color: '#333',
   },
@@ -162,6 +178,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 20,
+    margin: 20,
     fontSize: 16,
     elevation: 2,
   },
@@ -176,6 +193,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
+  },
+  ingredientsText: {
+    fontSize: 16,
+    color: '#36c190',
+    marginTop: 10,
+  },
+  ingredientsList: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  ingredientItem: {
+    fontSize: 14,
+    color: '#555',
   },
   detailsButton: {
     marginTop: 10,
