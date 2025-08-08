@@ -395,7 +395,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.anonymous.recipe-rescue-frontend";
-				PRODUCT_NAME = reciperescuefrontend;
+				PRODUCT_NAME = "reciperescuefrontend";
 				SWIFT_OBJC_BRIDGING_HEADER = "reciperescuefrontend/reciperescuefrontend-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -423,7 +423,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.anonymous.recipe-rescue-frontend";
-				PRODUCT_NAME = reciperescuefrontend;
+				PRODUCT_NAME = "reciperescuefrontend";
 				SWIFT_OBJC_BRIDGING_HEADER = "reciperescuefrontend/reciperescuefrontend-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

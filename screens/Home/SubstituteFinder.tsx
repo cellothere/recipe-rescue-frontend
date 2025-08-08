@@ -50,6 +50,12 @@ const SubstituteFinder: React.FC = () => {
     }
   };
 
+  const clearSubstitutes = () => {
+    setSubstitutes([]);
+    setIngredient('');
+    setAvoidAllergies(false);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.innerContainer}>
@@ -89,6 +95,13 @@ const SubstituteFinder: React.FC = () => {
             ))}
           </View>
         )}
+        
+        {/* Conditionally render Clear Button */}
+        {substitutes.length > 0 && (
+          <TouchableOpacity style={styles.clearButton} onPress={clearSubstitutes}>
+            <Text style={styles.clearButtonText}>Clear</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -126,9 +139,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: '100%',
     alignItems: 'center',
+    marginBottom: 10,
+  },
+  clearButton: {
+    backgroundColor: '#ff6f61',
+    marginTop: 15,
+    padding: 15,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
     marginBottom: 20,
   },
   buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  clearButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',

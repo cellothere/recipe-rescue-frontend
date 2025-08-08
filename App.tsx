@@ -56,8 +56,8 @@ const KitchenTabs = () => (
     }}
   >
     <Tab.Screen name="Allergies" component={Allergies} />
-    <Tab.Screen name="Kitchen" component={MyKitchen} />
-    <Tab.Screen name="Recipes" component={SavedRecipes} />
+    <Tab.Screen name="My Pantry" component={MyKitchen} />
+    <Tab.Screen name="My Recipes" component={SavedRecipes} />
   </Tab.Navigator>
 );
 

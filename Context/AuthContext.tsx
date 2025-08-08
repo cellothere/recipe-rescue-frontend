@@ -85,6 +85,7 @@ export const AuthProvider = ({ children }: any) => {
     const login = async (username: string, password: string) => {
         try {
             const result = await axios.post(`${API_URL}/auth/login`, { username, password });
+            console.log("successs")
             setAuthState({
                 token: result.data.accessToken,
                 authenticated: true,

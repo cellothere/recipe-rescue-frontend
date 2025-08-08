@@ -12,13 +12,13 @@ const Login = () => {
     const navigation = useNavigation();
 
     const login = async () => {
+        console.log('Attempting login with:', { username, password });
         try {
             const result = await onLogin!(username, password);
             
             if (result && result.error) {
                 Alert.alert('Error', result.msg);
             } else if (result && result.user) {
-
                 navigation.navigate('Home');
             }
         } catch (error) {

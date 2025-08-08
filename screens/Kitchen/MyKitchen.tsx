@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, FlatList, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { useUser } from '../../Context/UserContext';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL; // Update to your API's base URL
- // Replace with the actual user ID
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const MyKitchen: React.FC = () => {
   const [ingredients, setIngredients] = useState([]);
@@ -14,7 +13,6 @@ const MyKitchen: React.FC = () => {
   const { user } = useUser();
   const userId = user.userId;
 
-  // Fetch ingredients on component mount
   useEffect(() => {
     fetchIngredients();
   }, []);
@@ -39,14 +37,13 @@ const MyKitchen: React.FC = () => {
 
     try {
       const response = await axios.post(`${API_BASE_URL}/users/${userId}/kitchen/`, newIngredient);
-      setIngredients(response.data.kitchen); // Update kitchen with the response
+      setIngredients(response.data.kitchen);
       Alert.alert('Success', 'Ingredient added successfully.');
     } catch (error) {
       console.error('Error adding ingredient:', error);
       Alert.alert('Error', 'Failed to add ingredient.');
     }
 
-    // Reset inputs
     setIngredientName('');
     setMeasurementType('');
     setAmount('');
@@ -57,7 +54,7 @@ const MyKitchen: React.FC = () => {
       const response = await axios.delete(
         `${API_BASE_URL}/users/${userId}/kitchen/${ingredientId}`
       );
-      setIngredients(response.data.kitchen); // Update kitchen with the response
+      setIngredients(response.data.kitchen);
       Alert.alert('Success', 'Ingredient removed successfully.');
     } catch (error) {
       console.error('Error deleting ingredient:', error);
@@ -70,7 +67,12 @@ const MyKitchen: React.FC = () => {
       <Text style={styles.ingredientText}>
         {item.name} {item.amount ? `- ${item.amount}` : ''} {item.measurement || ''}
       </Text>
-      <Button title="Remove" color="#ff6f61" onPress={() => deleteIngredient(item._id)} />
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => deleteIngredient(item._id)}
+      >
+        <Text style={styles.deleteButtonText}>Remove</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -100,7 +102,9 @@ const MyKitchen: React.FC = () => {
         onChangeText={setMeasurementType}
       />
 
-      <Button title="Add Ingredient" onPress={addIngredient} />
+      <TouchableOpacity style={styles.addButton} onPress={addIngredient}>
+        <Text style={styles.addButtonText}>Add Ingredient</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={ingredients}
@@ -131,6 +135,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 16,
   },
+  addButton: {
+    backgroundColor: '#36c190',
+    padding: 10,
+    borderRadius: 30,
+    alignItems: 'center',
+    marginVertical: 10,
+    marginHorizontal: 10
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   ingredientItem: {
     padding: 10,
     borderBottomWidth: 1,
@@ -142,6 +159,15 @@ const styles = StyleSheet.create({
   ingredientText: {
     fontSize: 16,
     flex: 1,
+  },
+  deleteButton: {
+    backgroundColor: '#ff6f61',
+    padding: 10,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 14,
   },
 });
 
