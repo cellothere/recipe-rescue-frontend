@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useUser } from '../Context/UserContext';
 
+
 const Home: React.FC = () => {
   const navigation = useNavigation();
   const isDarkMode = useColorScheme() === 'dark';
